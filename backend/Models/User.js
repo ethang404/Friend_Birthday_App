@@ -28,9 +28,6 @@ const User = sequelize.define(
 		age: {
 			type: DataTypes.INTEGER,
 		},
-		password: {
-			type: DataTypes.STRING,
-		},
 	},
 	{
 		freezeTableName: true,

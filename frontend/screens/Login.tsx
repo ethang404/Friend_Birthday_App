@@ -1,37 +1,62 @@
 import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import * as SecureStore from "expo-secure-store";
+import React, { useState } from "react";
 
-export default function Login() {
-	async function handleClick() {
-		try {
-			let response = await fetch("http://10.0.2.2:8000/test", {
-				//http://localhost:8000/test
-				//Setting Method
-				method: "GET",
-			});
-			let data = await response.json();
-			console.log(data);
-		} catch (error) {
-			console.log("Something went wrong");
-		}
+export default function Login({ navigation }: { navigation: any }) {
+	const [userName, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+
+	async function save(key: string, value: string) {
+		await SecureStore.setItemAsync(key, value);
 	}
 
-	async function handleClick2() {
+	async function handleClick() {
+		console.log("Username is: ", userName);
+		console.log("Password is: ", password);
 		try {
-			let response = await fetch("192.168.1.207:8000/test"); //192.168.1.207
-			let data = await response.json();
-			console.log(data);
+			let response = await fetch("http://10.0.2.2:8000/auth/login", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ userName, password }),
+			});
+			if (response.ok) {
+				let data = await response.json();
+				console.log(data);
+				if (data.accessToken) await save("accessToken", data.accessToken);
+				if (data.refreshToken) await save("refreshToken", data.refreshToken);
+
+				let accessToken = await SecureStore.getItemAsync("accessToken");
+				console.log("AccessToken:", accessToken);
+				//navigate to home:
+				navigation.navigate("Home");
+			}
 		} catch (error) {
-			console.log("fail?");
+			console.log(error);
+			console.log("Something went wrong");
 		}
 	}
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.heading}>Login Page</Text>
-			<TextInput style={styles.input} placeholder="Username" />
-			<TextInput style={styles.input} placeholder="Password" secureTextEntry />
-			<Button title="testing" onPress={handleClick}></Button>
-			<Button title="testing2" onPress={handleClick2}></Button>
+			<TextInput
+				style={styles.input}
+				placeholder="Username"
+				onChangeText={(newText) => setUsername(newText)}
+			/>
+			<TextInput
+				style={styles.input}
+				placeholder="Password"
+				secureTextEntry
+				onChangeText={(newText) => setPassword(newText)}
+			/>
+			<Button title="Login" onPress={handleClick}></Button>
+			<Button
+				title="Navigate to Register"
+				onPress={() => navigation.navigate("RegisterInfo")}
+			></Button>
 		</View>
 	);
 }

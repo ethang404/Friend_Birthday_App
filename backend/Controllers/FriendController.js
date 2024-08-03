@@ -7,4 +7,7 @@ function friendOutput(req, res) {
 	return res.status(200).send({ message: "Testing my friendOutput" });
 }
 
+//Here is where a lot of my logic is going to be
+//ORM Queries for getting list of Friends of a user/Intrests etc.
+
 module.exports = { friendOutput };
